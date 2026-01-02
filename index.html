@@ -9,7 +9,6 @@
         :root {
             --transition-speed: 0.4s;
             --accent: rgba(255, 255, 255, 0.2);
-            /* Refined button colors to avoid sub-pixel bleed */
             --btn-bg: rgba(255, 255, 255, 0.12);
             --btn-hover: rgba(255, 255, 255, 0.25);
         }
@@ -31,7 +30,6 @@
             background-color: #111;
         }
 
-        /* Texture Layers */
         #texture-overlay {
             position: fixed;
             top: 0;
@@ -78,7 +76,7 @@
             align-items: center;
             min-height: 80vh;
             padding-top: 5vh;
-            padding-bottom: 120px;
+            padding-bottom: 160px; 
             text-align: center;
             position: relative;
             z-index: 4;
@@ -226,10 +224,9 @@
             opacity: 1;
         }
 
-        /* Buttons Fix: No backdrop-filter to prevent sub-pixel sliver artifacts */
         .button-group {
             position: fixed;
-            bottom: 40px;
+            bottom: 50px; 
             display: flex;
             gap: 24px;
             justify-content: center;
@@ -248,7 +245,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Using outline instead of border for cleaner scaling */
             border: none;
             outline: 1px solid rgba(255, 255, 255, 0.15);
             outline-offset: -1px;
@@ -277,16 +273,6 @@
             height: 28px;
             fill: currentColor;
             pointer-events: none;
-        }
-
-        .hint {
-            position: fixed;
-            bottom: 15px;
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            z-index: 5;
         }
 
         #settings-overlay {
@@ -321,11 +307,11 @@
         </div>
 
         <div class="setting-section">
-            <span class="setting-label">Amount of Traits</span>
+            <span class="setting-label">Profile Detail</span>
             <div class="density-toggle">
-                <button class="density-btn active" onclick="setDensity(1, this)">Low</button>
-                <button class="density-btn" onclick="setDensity(2, this)">Med</button>
-                <button class="density-btn" onclick="setDensity(3, this)">High</button>
+                <button id="btn-low" class="density-btn" onclick="setDensity(1, this)">Low</button>
+                <button id="btn-med" class="density-btn active" onclick="setDensity(2, this)">Med</button>
+                <button id="btn-high" class="density-btn" onclick="setDensity(3, this)">High</button>
             </div>
         </div>
 
@@ -357,24 +343,23 @@
         </button>
     </div>
 
-    <div class="hint">Name Generator</div>
-
     <script>
         const namesData = {
-            basicFirst: ["Henry", "Lance", "George", "Boris", "Leo", "James", "Clarence", "Gavin", "Duncan", "Cosmo", "Gene", "Connor", "Harold", "Basil", "Percival", "Vlad", "Ivar", "Orm", "Paul", "Johnny", "Tony", "Joe", "Sarah", "Cleo", "Anna", "Natasha", "Alexandra", "Victoria", "Georgia", "Amy", "Claire", "Robin", "Carol", "Annie", "Matilda", "Gertrude", "Tilde", "Ariel", "Harper", "Toni", "Gaby", "Jo"],
+            basicFirst: ["Henry", "Lance", "George", "Boris", "Leo", "James", "Clarence", "Gavin", "Duncan", "Cosmo", "Gene", "Connor", "Harold", "Basil", "Percival", "Vlad", "Ivar", "Orm", "Paul", "Johnny", "Tony", "Joe", "Vander", "Bertram", "Gordon", "Vincent", "Sarah", "Cleo", "Anna", "Natasha", "Alexandra", "Victoria", "Georgia", "Amy", "Claire", "Robin", "Carol", "Annie", "Matilda", "Gertrude", "Tilde", "Ariel", "Harper", "Toni", "Gaby", "Jo", "Gail", "Sophie", "Taylor", "Valorie", "Tammy", "Elora"],
             basicLast: ["Smith", "Wilton", "Beardsley", "Goldsmith", "Svenson", "Tyburn", "Stein", "Klein", "Kensington"],
-            literary: ["Rembrandt", "Garamond", "Raskolnikov", "Mitsurugi", "Valkai", "Dostoevsky"],
-            fantasy: ["Glade", "Wilde", "Zasha", "Vitreal", "Gloam", "Gnasher", "Colder", "Bilby", "Quokka", "Magma"],
-            goofy: ["Smarm", "Cherry", "Stove", "Chongle", "Bruck", "Vear", "Floop", "Gander", "Nose", "Verily", "Gufnork", "Gulch", "Staunch", "Vestigial", "Tiny", "the Goose"]
+            literary: ["Rembrandt", "Garamond", "Raskolnikov", "Mitsurugi", "Valkai", "Dostoevsky", "Voltair"],
+            fantasy: ["Glade", "Wilde", "Zasha", "Vitreal", "Gloam", "Gnasher", "Colder", "Bilby", "Quokka", "Magma", "Harp", "Fount", "Sage", "Mage", "Flower", "Charybdis", "Sonder", "Gale", "Halifax", "Halcyon", "Juraya", "Lunastra"],
+            goofy: ["Smarm", "Cherry", "Stove", "Chongle", "Bruck", "Vear", "Floop", "Gander", "Nose", "Verily", "Gufnork", "Gulch", "Staunch", "Vestigial", "Tiny", "the Goose", "Frount", "Swoosh", "Pogo", "Clump", "Lanky", "Twig", "Crackle"]
         };
 
         const profileData = {
-            physical: ["150cm", "160cm", "170cm", "180cm", "190cm", "200cm", "long neck", "tiny eyes", "long hair", "curly hair", "wears a hat", "has a limp"],
-            personality: ["quick to anger", "gets nervous easily", "introvert", "extrovert", "ambitious", "lazy", "talkative", "quiet", "bad at math", "inquisitive"],
-            habits: ["loves to sing", "plays an instrument", "reads a lot", "loves to exercize", "fidgety", "writes everything down", "collects things", "loves eating", "loves drinking"],
-            history: ["grew up in a very small town", "grew up in a very busy city", "has had seven career changes", "has broken six bones", "has had three near-death experiences"],
+            physical: ["a bit short", "very short", "tall", "very tall", "tiny eyes", "big eyes", "long hair", "short hair", "curly hair", "dark hair", "light hair", "wears a hat", "has a limp", "wears glasses", "wears eccentric clothes", "wears gloves", "wears baggy clothes", "wears armor", "has lots of piercings", "has many tattoos", "has one special tattoo", "eyes are always half-open"],
+            personality: ["quick to anger", "gets nervous easily", "introvert", "extrovert", "ambitious", "lazy", "talkative", "quiet", "bad at math", "inquisitive", "gets bored easily", "outspoken", "controlling", "compassionate"],
+            habits: ["loves to sing", "plays an instrument", "reads a lot", "loves to exercize", "fidgety", "writes everything down", "collects things", "loves eating", "loves drinking", "loves meeting new people"],
+            history: ["grew up in a very small town", "grew up in a very busy city", "has had seven career changes", "has broken six bones", "has had three near-death experiences", "used to be a champion", "has won an award", "has saved lives"],
             bonds: ["best friend is their pet dog", "has an imaginary friend", "has a secret that they have only ever told one person", "very close with family", "overbearing parents", "eternally indebted to a friend who saved their life", "has a lost love that they wish to one day return to"],
-            goals: ["wants to gain knowledge", "wants to gain power", "wants to beat their rival", "wants to see the world", "wants to achieve inner peace", "wants to leave a mark on the world", "wants to master their craft", "wants to find love", "wants to live a comfortable life", "wants to win"]
+            ideals: ["believes that all people should be free to live as they like", "believes that power is the only real commodity", "believes that everyone deserves a second chance", "believes that there is good in everyone", "believes that all people are inherently selfish", "believes that the only person you can trust is yourself", "believes that anything is achievable if you try hard enough", "thinks that hard work is usually not worthwhile", "thinks that they are the smartest person they will probably ever know", "believes that intelligence is the most important trait", "thinks that animals are more important than humans", "has as conviction that nature should be protected"],
+            goals: ["wants to gain knowledge", "wants to gain power", "wants to beat their rival", "wants to see the world", "wants to achieve inner peace", "wants to leave a mark on the world", "wants to master their craft", "wants to find love", "wants to live a comfortable life", "wants to win", "wants to be successful", "wants to forget a past experience", "wants to make amends", "wants to fix the world"]
         };
 
         const fonts = ['system-ui', 'Impact', 'Verdana', 'Trebuchet MS', 'Georgia', 'Times New Roman', 'Palatino', 'Courier New'];
@@ -389,7 +374,7 @@
 
         const state = {
             lastTextureIndex: -1,
-            density: 1
+            density: 2 
         };
 
         function toggleSettings() {
@@ -414,22 +399,12 @@
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
-        function pickMultiple(arr, count, isPhysical = false) {
+        function pickMultiple(arr, count) {
             let pool = [...arr];
             const result = [];
             pool.sort(() => 0.5 - Math.random());
-
             for (let i = 0; i < pool.length && result.length < count; i++) {
-                const trait = pool[i];
-                const isHeight = /\d+cm/.test(trait);
-
-                if (isPhysical && isHeight) {
-                    if (!result.some(t => /\d+cm/.test(t))) {
-                        result.push(trait);
-                    }
-                } else {
-                    result.push(trait);
-                }
+                result.push(pool[i]);
             }
             return result;
         }
@@ -455,22 +430,10 @@
             let firstPool = [];
             let lastPool = [];
 
-            if (useBasic) {
-                firstPool.push(...namesData.basicFirst);
-                lastPool.push(...namesData.basicLast);
-            }
-            if (useLit) {
-                firstPool.push(...namesData.literary);
-                lastPool.push(...namesData.literary);
-            }
-            if (useFan) {
-                firstPool.push(...namesData.fantasy);
-                lastPool.push(...namesData.fantasy);
-            }
-            if (useGoof) {
-                firstPool.push(...namesData.goofy);
-                lastPool.push(...namesData.goofy);
-            }
+            if (useBasic) { firstPool.push(...namesData.basicFirst); lastPool.push(...namesData.basicLast); }
+            if (useLit) { firstPool.push(...namesData.literary); lastPool.push(...namesData.literary); }
+            if (useFan) { firstPool.push(...namesData.fantasy); lastPool.push(...namesData.fantasy); }
+            if (useGoof) { firstPool.push(...namesData.goofy); lastPool.push(...namesData.goofy); }
 
             if (!firstPool.length) firstPool = ["Missing"];
             if (!lastPool.length) lastPool = ["Name"];
@@ -484,8 +447,6 @@
 
             display.innerText = `${randomFirst} ${randomLast}`;
             display.style.fontFamily = fonts[Math.floor(Math.random() * fonts.length)];
-            display.style.fontWeight = Math.random() > 0.5 ? '900' : '400';
-            display.style.fontStyle = Math.random() > 0.8 ? 'italic' : 'normal';
 
             const bgR = getRandomInt(15, 40);
             const bgG = getRandomInt(15, 40);
@@ -514,9 +475,9 @@
             profileDisplay.style.display = 'block';
 
             const densityMap = {
-                1: { physical: 1, personality: 1, habits: 1, history: 1, bonds: 1, goals: 1 },
-                2: { physical: 2, personality: 2, habits: 2, history: 2, bonds: 1, goals: 1 },
-                3: { physical: 3, personality: 3, habits: 3, history: 3, bonds: 2, goals: 2 }
+                1: { physical: 1, personality: 1, habits: 1, history: 1, bonds: 1, ideals: 1, goals: 1 },
+                2: { physical: 2, personality: 2, habits: 2, history: 2, bonds: 1, ideals: 1, goals: 1 },
+                3: { physical: 4, personality: 4, habits: 3, history: 3, bonds: 2, ideals: 2, goals: 2 }
             };
 
             const counts = densityMap[state.density];
@@ -524,8 +485,7 @@
             Object.keys(profileData).forEach(category => {
                 const list = profileData[category];
                 const count = counts[category] || 1;
-                
-                const selections = pickMultiple(list, count, category === 'physical');
+                const selections = pickMultiple(list, count);
                 
                 if (selections.length > 0) {
                     const container = document.createElement('div');
@@ -535,14 +495,12 @@
                         .map(trait => {
                             let t = trait.trim();
                             t = capitalize(t);
-                            if (!t.endsWith('.')) t += '.';
+                            if (!t.endsWith('.') && !t.endsWith('?') && !t.endsWith('!')) t += '.';
                             return t;
                         })
                         .join(" ");
 
-                    const textNode = document.createTextNode(traitString);
-                    container.appendChild(textNode);
-                    
+                    container.appendChild(document.createTextNode(traitString));
                     profileDisplay.appendChild(container);
                 }
             });
@@ -552,6 +510,3 @@
     </script>
 </body>
 </html>
-
-
-
