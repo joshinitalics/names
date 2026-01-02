@@ -128,7 +128,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Settings Panel */
         #settings-panel {
             position: fixed;
             top: 50%;
@@ -345,21 +344,23 @@
 
     <script>
         const namesData = {
-            basicFirst: ["Henry", "Lance", "George", "Boris", "Leo", "James", "Clarence", "Gavin", "Duncan", "Cosmo", "Gene", "Connor", "Harold", "Basil", "Percival", "Vlad", "Ivar", "Orm", "Paul", "Johnny", "Tony", "Joe", "Vander", "Bertram", "Gordon", "Vincent", "Sarah", "Cleo", "Anna", "Natasha", "Alexandra", "Victoria", "Georgia", "Amy", "Claire", "Robin", "Carol", "Annie", "Matilda", "Gertrude", "Tilde", "Ariel", "Harper", "Toni", "Gaby", "Jo", "Gail", "Sophie", "Taylor", "Valorie", "Tammy", "Elora"],
-            basicLast: ["Smith", "Wilton", "Beardsley", "Goldsmith", "Svenson", "Tyburn", "Stein", "Klein", "Kensington"],
-            literary: ["Rembrandt", "Garamond", "Raskolnikov", "Mitsurugi", "Valkai", "Dostoevsky", "Voltair"],
-            fantasy: ["Glade", "Wilde", "Zasha", "Vitreal", "Gloam", "Gnasher", "Colder", "Bilby", "Quokka", "Magma", "Harp", "Fount", "Sage", "Mage", "Flower", "Charybdis", "Sonder", "Gale", "Halifax", "Halcyon", "Juraya", "Lunastra"],
-            goofy: ["Smarm", "Cherry", "Stove", "Chongle", "Bruck", "Vear", "Floop", "Gander", "Nose", "Verily", "Gufnork", "Gulch", "Staunch", "Vestigial", "Tiny", "the Goose", "Frount", "Swoosh", "Pogo", "Clump", "Lanky", "Twig", "Crackle"]
+            basicFirst: ["Henry", "Lance", "George", "Boris", "Leo", "James", "Clarence", "Gavin", "Duncan", "Cosmo", "Gene", "Connor", "Harold", "Basil", "Percival", "Vlad", "Ivar", "Orm", "Paul", "Johnny", "Tony", "Joe", "Vander", "Bertram", "Gordon", "Vincent", "Keanu", "Jayce", "Toby", "Lawrence", "Sarah", "Cleo", "Anna", "Natasha", "Alexandra", "Victoria", "Georgia", "Amy", "Claire", "Robin", "Carol", "Annie", "Matilda", "Gertrude", "Tilde", "Ariel", "Harper", "Toni", "Gaby", "Jo", "Gail", "Sophie", "Taylor", "Valorie", "Tammy", "Elora", "Phoebe", "Meredith", "Amelia"],
+            basicLast: ["Smith", "Wilton", "Beardsley", "Goldsmith", "Svenson", "Tyburn", "Stein", "Klein", "Kensington", "Callister", "Farthington", "Billsborough"],
+            literary: ["Rembrandt", "Garamond", "Raskolnikov", "Mitsurugi", "Valkai", "Dostoevsky", "Voltair", "Maliketh", "Morgoth", "Aurelius", "Phobos", "Erasmus", "Inigo", "Vizzini", "Sarosh", "Blathers"],
+            fantasy: ["Glade", "Wilde", "Zasha", "Vitreal", "Gloam", "Gnasher", "Colder", "Bilby", "Quokka", "Magma", "Harp", "Fount", "Sage", "Mage", "Flower", "Charybdis", "Sonder", "Gale", "Halifax", "Halcyon", "Juraya", "Lunastra", "Cardamom", "Treacle", "Sunshine", "Lustre", "Zash", "Finch", "Damon", "Beastslayer", "Champion", "Void", "Surandil"],
+            fantasyLast: ["the Herald", "the Beast", "the Keeper", "Lordsworn", "the Third"],
+            goofy: ["Smarm", "Cherry", "Stove", "Chongle", "Bruck", "Vear", "Floop", "Gander", "Nose", "Verily", "Gufnork", "Gulch", "Staunch", "Vestigial", "Tiny", "Frount", "Swoosh", "Pogo", "Clump", "Lanky", "Twig", "Crackle", "Plinth", "Sog", "Guarana", "Teef", "Rombo", "Goggle", "Bean", "Layman", "Pleb"],
+            goofyLast: ["the Goose", "the Bean", "the One and Only"]
         };
 
         const profileData = {
-            physical: ["a bit short", "very short", "tall", "very tall", "tiny eyes", "big eyes", "long hair", "short hair", "curly hair", "dark hair", "light hair", "wears a hat", "has a limp", "wears glasses", "wears eccentric clothes", "wears gloves", "wears baggy clothes", "wears armor", "has lots of piercings", "has many tattoos", "has one special tattoo", "eyes are always half-open"],
-            personality: ["quick to anger", "gets nervous easily", "introvert", "extrovert", "ambitious", "lazy", "talkative", "quiet", "bad at math", "inquisitive", "gets bored easily", "outspoken", "controlling", "compassionate"],
-            habits: ["loves to sing", "plays an instrument", "reads a lot", "loves to exercize", "fidgety", "writes everything down", "collects things", "loves eating", "loves drinking", "loves meeting new people"],
-            history: ["grew up in a very small town", "grew up in a very busy city", "has had seven career changes", "has broken six bones", "has had three near-death experiences", "used to be a champion", "has won an award", "has saved lives"],
-            bonds: ["best friend is their pet dog", "has an imaginary friend", "has a secret that they have only ever told one person", "very close with family", "overbearing parents", "eternally indebted to a friend who saved their life", "has a lost love that they wish to one day return to"],
+            physical: ["a bit short", "very short", "tall", "very tall", "tiny eyes", "big eyes", "long hair", "short hair", "curly hair", "dark hair", "light hair", "wears a hat", "has a limp", "wears glasses", "eccentric clothes", "wears gloves", "baggy clothes", "wears armor", "lots of piercings", "many tattoos", "has one special tattoo", "eyes are half-open", "heavy boots", "elegant clothing", "scrawny", "lean", "muscular", "big nose"],
+            personality: ["quick to anger", "gets nervous easily", "introvert", "extrovert", "ambitious", "lazy", "talkative", "quiet", "bad at math", "inquisitive", "gets bored easily", "outspoken", "controlling", "compassionate", "bubbly", "caring", "solitary", "takes a while to understand jokes", "likes trying new things", "hesitant to try new things", "gets distracted easily", "forgetful"],
+            habits: ["loves to sing", "plays an instrument", "reads a lot", "loves to exercize", "fidgety", "writes everything down", "collects things", "loves eating", "loves drinking", "loves meeting new people", "checks the time often", "makes jokes at the wrong time", "loves to cook/bake", "doesn't make eye-contact"],
+            history: ["grew up in a very small town", "grew up in a very busy city", "has had seven career changes", "has broken six bones", "has had three near-death experiences", "used to be a champion", "has won an award", "has saved lives", "used to be a leader", "ran away from home", "built a fortune but lost it all", "has discovered a secret about the world", "has a surprising skill that they learnt in another life"],
+            bonds: ["has a pet who is their best friend", "has an imaginary friend", "has a secret that they have only ever told one person", "very close with family", "overbearing parents", "eternally indebted to a friend who saved their life", "has a lost love that they wish to one day return to", "cherishes a special item as if it were sentient", "has children who live far away", "doesn't know who their parents are"],
             ideals: ["believes that all people should be free to live as they like", "believes that power is the only real commodity", "believes that everyone deserves a second chance", "believes that there is good in everyone", "believes that all people are inherently selfish", "believes that the only person you can trust is yourself", "believes that anything is achievable if you try hard enough", "thinks that hard work is usually not worthwhile", "thinks that they are the smartest person they will probably ever know", "believes that intelligence is the most important trait", "thinks that animals are more important than humans", "has as conviction that nature should be protected"],
-            goals: ["wants to gain knowledge", "wants to gain power", "wants to beat their rival", "wants to see the world", "wants to achieve inner peace", "wants to leave a mark on the world", "wants to master their craft", "wants to find love", "wants to live a comfortable life", "wants to win", "wants to be successful", "wants to forget a past experience", "wants to make amends", "wants to fix the world"]
+            goals: ["wants to gain knowledge", "wants to gain power", "wants to beat their rival", "wants to see the world", "wants to achieve inner peace", "wants to leave a mark on the world", "wants to master their craft", "wants to find love", "wants to live a comfortable life", "wants to win", "wants to be successful", "wants to forget a past experience", "wants to make amends", "wants to fix the world", "wants to discover their identity", "wants to unravel a great mystery"]
         };
 
         const fonts = ['system-ui', 'Impact', 'Verdana', 'Trebuchet MS', 'Georgia', 'Times New Roman', 'Palatino', 'Courier New'];
@@ -395,7 +396,7 @@
         }
 
         function pickRandom(arr) {
-            if (!arr.length) return "";
+            if (!arr || !arr.length) return "";
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
@@ -432,8 +433,16 @@
 
             if (useBasic) { firstPool.push(...namesData.basicFirst); lastPool.push(...namesData.basicLast); }
             if (useLit) { firstPool.push(...namesData.literary); lastPool.push(...namesData.literary); }
-            if (useFan) { firstPool.push(...namesData.fantasy); lastPool.push(...namesData.fantasy); }
-            if (useGoof) { firstPool.push(...namesData.goofy); lastPool.push(...namesData.goofy); }
+            if (useFan) { 
+                firstPool.push(...namesData.fantasy); 
+                lastPool.push(...namesData.fantasy); 
+                lastPool.push(...namesData.fantasyLast); 
+            }
+            if (useGoof) { 
+                firstPool.push(...namesData.goofy); 
+                lastPool.push(...namesData.goofy); 
+                lastPool.push(...namesData.goofyLast); 
+            }
 
             if (!firstPool.length) firstPool = ["Missing"];
             if (!lastPool.length) lastPool = ["Name"];
@@ -441,13 +450,17 @@
             let randomFirst = pickRandom(firstPool);
             let randomLast = pickRandom(lastPool);
 
-            while (randomFirst === randomLast && firstPool.length > 1) {
+            // Avoid same first/last unless specifically requested or pool is tiny
+            let attempts = 0;
+            while (randomFirst.toLowerCase() === randomLast.toLowerCase() && firstPool.length > 1 && attempts < 10) {
                 randomLast = pickRandom(lastPool);
+                attempts++;
             }
 
             display.innerText = `${randomFirst} ${randomLast}`;
             display.style.fontFamily = fonts[Math.floor(Math.random() * fonts.length)];
 
+            // Theme update
             const bgR = getRandomInt(15, 40);
             const bgG = getRandomInt(15, 40);
             const bgB = getRandomInt(15, 40);
