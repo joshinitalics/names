@@ -40,9 +40,10 @@
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .theme-blue { --accent: #3b82f6; }
-        .theme-amber { --accent: #f59e0b; }
-        .theme-red { --accent: #ef4444; }
+        /* Colors: Toned down Red, Vibrant Green, Vibrant Blue */
+        .theme-red { --accent: #b91c1c; }     /* Muted Crimson */
+        .theme-green { --accent: #10b981; }   /* Vibrant Emerald */
+        .theme-blue { --accent: #3b82f6; }    /* Vibrant Blue */
 
         .accent-border { border-top: 3px solid var(--accent); }
         .accent-bg { background-color: var(--accent); }
@@ -57,7 +58,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Modal styling */
         #simple-text-modal {
             background-color: rgba(0,0,0,0.85);
             backdrop-filter: blur(8px);
@@ -66,65 +66,61 @@
 </head>
 <body class="p-6 md:p-8">
 
-    <header class="max-w-7xl mx-auto mb-8 text-center">
+    <header class="max-w-7xl mx-auto mb-12 text-center">
         <h1 class="serif text-4xl md:text-5xl text-white">Words of the Day</h1>
     </header>
 
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <!-- Dictionary.com -->
-        <div id="card-dict" class="word-card theme-blue accent-border rounded-2xl p-6 py-5 min-h-[260px] flex flex-col">
+        <!-- Section 1: Academic (Red) -->
+        <div id="card-academic" class="word-card theme-red accent-border rounded-2xl p-6 py-5 min-h-[260px] flex flex-col shadow-lg">
             <div class="flex justify-between items-center mb-0">
-                <span class="accent-text text-[9px] font-black uppercase tracking-[0.2em]">Dictionary.com</span>
-                <div id="loader-dict" class="loader hidden"></div>
+                <span class="accent-text text-[9px] font-black uppercase tracking-[0.2em]">Academic</span>
+                <div id="loader-academic" class="loader hidden"></div>
             </div>
-            <div id="target-dict" class="flex-grow flex flex-col justify-center">
-                <p class="text-slate-600 text-sm animate-pulse mt-6">Loading feed...</p>
+            <div id="target-academic" class="flex-grow flex flex-col justify-center">
+                <p class="text-slate-600 text-sm animate-pulse">Consulting Lexicon...</p>
             </div>
         </div>
 
-        <!-- Wordsmith -->
-        <div id="card-wordsmith" class="word-card theme-amber accent-border rounded-2xl p-6 py-5 min-h-[260px] flex flex-col">
+        <!-- Section 2: Literary (Green) -->
+        <div id="card-literary" class="word-card theme-green accent-border rounded-2xl p-6 py-5 min-h-[260px] flex flex-col shadow-lg">
             <div class="flex justify-between items-center mb-0">
-                <span class="accent-text text-[9px] font-black uppercase tracking-[0.2em]">Wordsmith.org</span>
-                <div id="loader-wordsmith" class="loader hidden"></div>
+                <span class="accent-text text-[9px] font-black uppercase tracking-[0.2em]">Literary</span>
+                <div id="loader-literary" class="loader hidden"></div>
             </div>
-            <div id="target-wordsmith" class="flex-grow flex flex-col justify-center">
-                <p class="text-slate-600 text-sm animate-pulse mt-6">Loading feed...</p>
+            <div id="target-literary" class="flex-grow flex flex-col justify-center">
+                <p class="text-slate-600 text-sm animate-pulse">Consulting Lexicon...</p>
             </div>
         </div>
 
-        <!-- Merriam-Webster -->
-        <div id="card-mw" class="word-card theme-red accent-border rounded-2xl p-6 py-5 min-h-[260px] flex flex-col">
+        <!-- Section 3: Whimsical (Blue) -->
+        <div id="card-whimsical" class="word-card theme-blue accent-border rounded-2xl p-6 py-5 min-h-[260px] flex flex-col shadow-lg">
             <div class="flex justify-between items-center mb-0">
-                <span class="accent-text text-[9px] font-black uppercase tracking-[0.2em]">Merriam-Webster</span>
-                <div id="loader-mw" class="loader hidden"></div>
+                <span class="accent-text text-[9px] font-black uppercase tracking-[0.2em]">Whimsical</span>
+                <div id="loader-whimsical" class="loader hidden"></div>
             </div>
-            <div id="target-mw" class="flex-grow flex flex-col justify-center">
-                <p class="text-slate-600 text-sm animate-pulse mt-6">Loading feed...</p>
+            <div id="target-whimsical" class="flex-grow flex flex-col justify-center">
+                <p class="text-slate-600 text-sm animate-pulse">Consulting Lexicon...</p>
             </div>
         </div>
-
     </div>
 
-    <div class="text-center mt-10 space-x-4">
-        <button onclick="fetchAll()" class="px-10 py-4 bg-white text-black font-black rounded-full hover:bg-slate-200 hover:scale-105 transition-all active:scale-95 text-[10px] uppercase tracking-[0.2em] shadow-xl">
-            Refresh All Feeds
+    <div class="text-center mt-12 space-x-4">
+        <button onclick="generateAll()" class="px-10 py-4 bg-white text-black font-black rounded-full hover:bg-slate-200 hover:scale-105 transition-all active:scale-95 text-[10px] uppercase tracking-[0.2em] shadow-xl">
+            Check for Updates
         </button>
         <button onclick="showSimpleText()" class="px-10 py-4 bg-slate-800 text-white font-black rounded-full hover:bg-slate-700 hover:scale-105 transition-all active:scale-95 text-[10px] uppercase tracking-[0.2em] shadow-xl">
             Simple Text
         </button>
     </div>
 
-    <!-- Modal for Simple Text -->
+    <!-- Simple Text Modal -->
     <div id="simple-text-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
         <div class="bg-[#1a1a1a] border border-slate-800 w-full max-w-2xl rounded-3xl p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="serif text-2xl text-white">Simple View</h3>
             </div>
-            <div id="simple-content-area" class="space-y-4 font-mono text-sm leading-relaxed text-slate-300">
-                <!-- Content will be injected here -->
-            </div>
+            <div id="simple-content-area" class="space-y-4 font-mono text-sm leading-relaxed text-slate-300"></div>
             <div class="mt-8 pt-6 border-t border-slate-800 flex justify-end gap-3">
                 <button id="copy-btn" onclick="copySimpleText()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase rounded-full transition-colors">Copy</button>
                 <button onclick="closeModal()" class="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold uppercase rounded-full transition-colors">Close</button>
@@ -133,122 +129,91 @@
     </div>
 
     <script>
-        const apiKey = ""; // Provided at runtime
-        let currentWords = { dict: null, wordsmith: null, mw: null };
+        const manualApiKey = ""; 
+        const apiKey = manualApiKey || (typeof __api_key !== 'undefined' ? __api_key : "");
+        let currentWords = { academic: null, literary: null, whimsical: null };
 
-        const CONFIG = {
-            dict: {
-                url: "https://www.dictionary.com/e/word-of-the-day/feed/",
-                prompt: "Extract the latest 'Word of the Day' from this XML. Return ONLY JSON: {'word': '...', 'pos': '...', 'definition': '...'}. Ensure the definition ends with a period. The 'pos' field should be the part of speech."
-            },
-            wordsmith: {
-                url: "https://wordsmith.org/awad/rss1.xml",
-                prompt: "Extract the latest word, its part of speech, and definition from this RDF/RSS feed. Return ONLY JSON: {'word': '...', 'pos': '...', 'definition': '...'}. Ensure the definition ends with a period. Strip 'A.Word.A.Day: ' from the word."
-            },
-            mw: {
-                url: "https://www.merriam-webster.com/wotd/feed/rss2",
-                prompt: "Identify the latest Merriam-Webster Word of the Day from this RSS feed. Extract the word from <title>, and identify its part of speech and primary definition from the <description>. Ensure the definition ends with a period. Return ONLY JSON: {'word': '...', 'pos': '...', 'definition': '...'}"
-            }
-        };
-
-        async function fetchWithRetry(url) {
-            const proxies = [
-                `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&t=${Date.now()}`
-            ];
-
-            for (const proxy of proxies) {
-                try {
-                    const response = await fetch(proxy);
-                    if (!response.ok) continue;
-                    
-                    if (proxy.includes('allorigins')) {
-                        const json = await response.json();
-                        if (json.contents) return json.contents;
-                    } else {
-                        const text = await response.text();
-                        if (text && text.length > 50) return text;
-                    }
-                } catch (e) {
-                    console.warn(`Proxy failed: ${proxy}`);
-                }
-            }
-            throw new Error("Feeds currently unavailable.");
+        function getSydneyDateString() {
+            return new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'Australia/Sydney',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).format(new Date());
         }
 
-        async function fetchSource(id) {
-            const loader = document.getElementById(`loader-${id}`);
-            const target = document.getElementById(`target-${id}`);
+        const TIERS = {
+            academic: "Generate a sophisticated, high-level academic 'Word of the Day' (like GRE/SAT level).",
+            literary: "Generate a rare, beautiful, or archaic 'Word of the Day' often found in classic literature.",
+            whimsical: "Generate a charming, whimsical, or fanciful 'Word of the Day' that is legitimate but playful (e.g., 'susurrus', 'petrichor', 'mellifluous')."
+        };
+
+        async function fetchAIWord(tier) {
+            const loader = document.getElementById(`loader-${tier}`);
+            const target = document.getElementById(`target-${tier}`);
             
             loader.classList.remove('hidden');
             target.classList.add('opacity-30');
 
             try {
-                const xmlContent = await fetchWithRetry(CONFIG[id].url);
-                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                const dateSeed = getSydneyDateString();
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
                 
-                const genResponse = await fetch(geminiUrl, {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: `DATA SOURCE:\n${xmlContent.substring(0, 15000)}` }] }],
-                        systemInstruction: { parts: [{ text: CONFIG[id].prompt }] },
+                        contents: [{ 
+                            parts: [{ 
+                                text: `SYSTEM: Today is ${dateSeed} in Sydney. This date is the absolute seed for word selection. You must always return the same word for this specific date. 
+                                TASK: ${TIERS[tier]} 
+                                FORMAT: Return ONLY JSON: {"word": "...", "pos": "...", "definition": "..."}. Definition must be one sentence.` 
+                            }] 
+                        }],
                         generationConfig: { 
-                            responseMimeType: "application/json",
-                            temperature: 0
+                            responseMimeType: "application/json", 
+                            temperature: 0 // Temperature 0 ensures the same output for the same prompt/seed
                         }
                     })
                 });
 
-                const result = await genResponse.json();
+                if (!response.ok) throw new Error("API Error");
+
+                const result = await response.json();
                 const wordData = JSON.parse(result.candidates[0].content.parts[0].text);
                 
-                if (!wordData.definition.endsWith('.')) wordData.definition += '.';
-                currentWords[id] = wordData;
+                currentWords[tier] = wordData;
 
                 target.innerHTML = `
                     <div class="fade-in">
                         <div class="flex items-baseline gap-2 mb-1 flex-wrap">
                             <h2 class="serif text-3xl text-white capitalize tracking-tight">${wordData.word}</h2>
-                            <span class="text-slate-500 italic text-[13px] font-light lowercase">${wordData.pos || ''}</span>
+                            <span class="text-slate-500 italic text-[13px] font-light lowercase">${wordData.pos}</span>
                         </div>
                         <div class="w-8 h-[2px] accent-bg rounded-full mb-4 opacity-80"></div>
-                        <p class="text-slate-300 text-base font-light leading-relaxed">
-                            ${wordData.definition}
-                        </p>
+                        <p class="text-slate-300 text-base font-light leading-relaxed">${wordData.definition}</p>
                     </div>
                 `;
             } catch (err) {
-                target.innerHTML = `
-                    <div class="fade-in">
-                        <p class="text-red-500/80 text-[10px] font-black uppercase tracking-widest">Feed Error</p>
-                        <p class="text-slate-600 text-xs italic mt-2">Could not reach source.</p>
-                    </div>
-                `;
+                target.innerHTML = `<p class="text-red-900 text-[10px] uppercase font-bold">Lexicon Unavailable.</p>`;
             } finally {
                 loader.classList.add('hidden');
                 target.classList.remove('opacity-30');
             }
         }
 
-        function generateSimpleTextString() {
-            const lines = [];
-            if (currentWords.mw) lines.push(`🔴 ${currentWords.mw.word.toLowerCase()} • ${currentWords.mw.pos.toLowerCase()} • ${currentWords.mw.definition.toLowerCase()}`);
-            if (currentWords.wordsmith) lines.push(`🟢 ${currentWords.wordsmith.word.toLowerCase()} • ${currentWords.wordsmith.pos.toLowerCase()} • ${currentWords.wordsmith.definition.toLowerCase()}`);
-            if (currentWords.dict) lines.push(`🔵 ${currentWords.dict.word.toLowerCase()} • ${currentWords.dict.pos.toLowerCase()} • ${currentWords.dict.definition.toLowerCase()}`);
-            return lines.join('\n');
+        function generateAll() {
+            Object.keys(TIERS).forEach(tier => fetchAIWord(tier));
         }
 
         function showSimpleText() {
             const modal = document.getElementById('simple-text-modal');
             const container = document.getElementById('simple-content-area');
             const lines = [];
-            ['mw', 'wordsmith', 'dict'].forEach((id, idx) => {
+            ['academic', 'literary', 'whimsical'].forEach((id, idx) => {
                 const color = ['🔴', '🟢', '🔵'][idx];
                 if (currentWords[id]) {
                     lines.push(`${color} <b>${currentWords[id].word.toLowerCase()}</b> • ${currentWords[id].pos.toLowerCase()} • ${currentWords[id].definition.toLowerCase()}`);
-                } else {
-                    lines.push(`${color} ${id} not loaded`);
                 }
             });
             container.innerHTML = lines.map(line => `<div>${line}</div>`).join('');
@@ -256,34 +221,21 @@
         }
 
         function copySimpleText() {
-            const text = generateSimpleTextString();
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                const btn = document.getElementById('copy-btn');
-                const originalText = btn.innerText;
-                btn.innerText = "Copied!";
-                btn.classList.replace('bg-blue-600', 'bg-green-600');
-                setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.classList.replace('bg-green-600', 'bg-blue-600');
-                }, 2000);
-            } catch (err) {}
-            document.body.removeChild(textArea);
+            const text = ['academic', 'literary', 'whimsical']
+                .filter(id => currentWords[id])
+                .map((id, i) => `${['🔴','🟢','🔵'][i]} ${currentWords[id].word.toLowerCase()} • ${currentWords[id].pos.toLowerCase()} • ${currentWords[id].definition.toLowerCase()}`)
+                .join('\n');
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
         }
 
-        function closeModal() {
-            document.getElementById('simple-text-modal').classList.add('hidden');
-        }
+        function closeModal() { document.getElementById('simple-text-modal').classList.add('hidden'); }
 
-        function fetchAll() {
-            Object.keys(CONFIG).forEach(id => fetchSource(id));
-        }
-
-        window.onload = fetchAll;
+        window.onload = generateAll;
     </script>
 </body>
 </html>
