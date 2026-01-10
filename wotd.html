@@ -29,22 +29,12 @@
         .word-card {
             background-color: var(--card-bg);
             border: 1px solid #1e293b;
+            transition: transform 0.3s ease;
         }
 
-        .loader {
-            width: 20px; height: 20px;
-            border: 2px solid rgba(255,255,255,0.1);
-            border-top: 2px solid var(--accent);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Colors: Toned down Red, Vibrant Green, Vibrant Blue */
-        .theme-red { --accent: #b91c1c; }     /* Muted Crimson */
-        .theme-green { --accent: #10b981; }   /* Vibrant Emerald */
-        .theme-blue { --accent: #3b82f6; }    /* Vibrant Blue */
+        .theme-red { --accent: #b91c1c; }
+        .theme-green { --accent: #10b981; }
+        .theme-blue { --accent: #3b82f6; }
 
         .accent-border { border-top: 3px solid var(--accent); }
         .accent-bg { background-color: var(--accent); }
@@ -59,7 +49,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        #simple-text-modal {
+        .modal-overlay {
             background-color: rgba(0,0,0,0.85);
             backdrop-filter: blur(8px);
         }
@@ -69,122 +59,115 @@
 
     <header class="max-w-7xl mx-auto mb-12 text-center">
         <h1 class="serif text-4xl md:text-5xl text-white">Words of the Day</h1>
+        <p class="text-slate-500 text-[10px] uppercase tracking-[0.3em] mt-2">Local Curated Archive • Sydney Time Seeded</p>
     </header>
 
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Section 1: Academic (Red) -->
-        <div id="card-academic" class="word-card theme-red accent-border rounded-2xl p-6 py-5 min-h-[260px] flex flex-col shadow-lg">
-            <div class="flex justify-between items-center mb-0">
+        <!-- Academic Card -->
+        <div id="card-academic" class="word-card theme-red accent-border rounded-2xl p-6 py-8 min-h-[260px] flex flex-col shadow-lg">
+            <div class="mb-4">
                 <span class="accent-text text-[9px] font-black uppercase tracking-[0.2em]">Academic</span>
-                <div id="loader-academic" class="loader hidden"></div>
             </div>
-            <div id="target-academic" class="flex-grow flex flex-col justify-center">
-                <p class="text-slate-600 text-sm animate-pulse">Consulting Lexicon...</p>
-            </div>
+            <div id="target-academic" class="flex-grow flex flex-col justify-center"></div>
         </div>
 
-        <!-- Section 2: Literary (Green) -->
-        <div id="card-literary" class="word-card theme-green accent-border rounded-2xl p-6 py-5 min-h-[260px] flex flex-col shadow-lg">
-            <div class="flex justify-between items-center mb-0">
+        <!-- Literary Card -->
+        <div id="card-literary" class="word-card theme-green accent-border rounded-2xl p-6 py-8 min-h-[260px] flex flex-col shadow-lg">
+            <div class="mb-4">
                 <span class="accent-text text-[9px] font-black uppercase tracking-[0.2em]">Literary</span>
-                <div id="loader-literary" class="loader hidden"></div>
             </div>
-            <div id="target-literary" class="flex-grow flex flex-col justify-center">
-                <p class="text-slate-600 text-sm animate-pulse">Consulting Lexicon...</p>
-            </div>
+            <div id="target-literary" class="flex-grow flex flex-col justify-center"></div>
         </div>
 
-        <!-- Section 3: Whimsical (Blue) -->
-        <div id="card-whimsical" class="word-card theme-blue accent-border rounded-2xl p-6 py-5 min-h-[260px] flex flex-col shadow-lg">
-            <div class="flex justify-between items-center mb-0">
+        <!-- Whimsical Card -->
+        <div id="card-whimsical" class="word-card theme-blue accent-border rounded-2xl p-6 py-8 min-h-[260px] flex flex-col shadow-lg">
+            <div class="mb-4">
                 <span class="accent-text text-[9px] font-black uppercase tracking-[0.2em]">Whimsical</span>
-                <div id="loader-whimsical" class="loader hidden"></div>
             </div>
-            <div id="target-whimsical" class="flex-grow flex flex-col justify-center">
-                <p class="text-slate-600 text-sm animate-pulse">Consulting Lexicon...</p>
-            </div>
+            <div id="target-whimsical" class="flex-grow flex flex-col justify-center"></div>
         </div>
     </div>
 
     <div class="text-center mt-12 space-x-4">
-        <button onclick="generateAll()" class="px-10 py-4 bg-white text-black font-black rounded-full hover:bg-slate-200 hover:scale-105 transition-all active:scale-95 text-[10px] uppercase tracking-[0.2em] shadow-xl">
-            Check for Updates
-        </button>
         <button onclick="showSimpleText()" class="px-10 py-4 bg-slate-800 text-white font-black rounded-full hover:bg-slate-700 hover:scale-105 transition-all active:scale-95 text-[10px] uppercase tracking-[0.2em] shadow-xl">
             Simple Text
         </button>
     </div>
 
     <!-- Simple Text Modal -->
-    <div id="simple-text-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+    <div id="simple-text-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4 modal-overlay">
         <div class="bg-[#1a1a1a] border border-slate-800 w-full max-w-2xl rounded-3xl p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="serif text-2xl text-white">Simple View</h3>
             </div>
             <div id="simple-content-area" class="space-y-4 font-mono text-sm leading-relaxed text-slate-300"></div>
             <div class="mt-8 pt-6 border-t border-slate-800 flex justify-end gap-3">
-                <button id="copy-btn" onclick="copySimpleText()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase rounded-full transition-colors">Copy</button>
+                <button onclick="copySimpleText()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase rounded-full transition-colors">Copy</button>
                 <button onclick="closeModal()" class="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold uppercase rounded-full transition-colors">Close</button>
             </div>
         </div>
     </div>
 
     <script>
-        const manualApiKey = ""; 
-        const apiKey = manualApiKey || (typeof __api_key !== 'undefined' ? __api_key : "");
+        // A curated list of words. For a production app, you can expand these to 365+ items.
+        const LEXICON = {
+            academic: [
+                { word: "Anachronism", pos: "noun", def: "Something out of its proper time, especially belonging to an earlier period." },
+                { word: "Cognizant", pos: "adj", def: "Having knowledge or being aware of something." },
+                { word: "Epitome", pos: "noun", def: "A person or thing that is a perfect example of a particular quality or type." },
+                { word: "Inherent", pos: "adj", def: "Existing in something as a permanent, essential, or characteristic attribute." },
+                { word: "Paradigm", pos: "noun", def: "A typical example or pattern of something; a model." },
+                { word: "Pragmatic", pos: "adj", def: "Dealing with things sensibly and realistically in a way that is based on practical considerations." },
+                { word: "Ubiquitous", pos: "adj", def: "Present, appearing, or found everywhere." }
+            ],
+            literary: [
+                { word: "Ephemeral", pos: "adj", def: "Lasting for a very short time." },
+                { word: "Gossamer", pos: "adj", def: "Used to refer to something very light, thin, and insubstantial or delicate." },
+                { word: "Mellifluous", pos: "adj", def: "A sound that is sweet or musical; pleasant to hear." },
+                { word: "Nefarious", pos: "adj", def: "Wicked, villainous, or criminal." },
+                { word: "Penury", pos: "noun", def: "Extreme poverty; destitution." },
+                { word: "Quixotic", pos: "adj", def: "Exceedingly idealistic; unrealistic and impractical." },
+                { word: "Surreptitious", pos: "adj", def: "Kept secret, especially because it would not be approved of." }
+            ],
+            whimsical: [
+                { word: "Bumblepuppy", pos: "noun", def: "A game played without rules; aimless or unskillful play." },
+                { word: "Lollygag", pos: "verb", def: "To spend time aimlessly; to dawdle or loiter." },
+                { word: "Petrichor", pos: "noun", def: "A pleasant smell that frequently accompanies the first rain after a long period of warm, dry weather." },
+                { word: "Serendipity", pos: "noun", def: "The occurrence and development of events by chance in a happy or beneficial way." },
+                { word: "Susurrus", pos: "noun", def: "Whispering, murmuring, or rustling." },
+                { word: "Taradiddle", pos: "noun", def: "A petty lie; pretentious nonsense." },
+                { word: "Wanderlust", pos: "noun", def: "A strong desire to travel." }
+            ]
+        };
+
         let currentWords = { academic: null, literary: null, whimsical: null };
 
-        function getSydneyDateString() {
-            return new Intl.DateTimeFormat('en-CA', {
+        function getSeededIndex(length) {
+            // Get date string in Sydney (YYYY-MM-DD)
+            const sydneyDate = new Intl.DateTimeFormat('en-CA', {
                 timeZone: 'Australia/Sydney',
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit'
             }).format(new Date());
+            
+            // Simple hash of the date string
+            let hash = 0;
+            for (let i = 0; i < sydneyDate.length; i++) {
+                hash = ((hash << 5) - hash) + sydneyDate.charCodeAt(i);
+                hash |= 0; 
+            }
+            return Math.abs(hash) % length;
         }
 
-        const TIERS = {
-            academic: "Generate a sophisticated, high-level academic 'Word of the Day' (like GRE/SAT level).",
-            literary: "Generate a rare, beautiful, or archaic 'Word of the Day' often found in classic literature.",
-            whimsical: "Generate a charming, whimsical, or fanciful 'Word of the Day' that is legitimate but playful (e.g., 'susurrus', 'petrichor', 'mellifluous')."
-        };
-
-        async function fetchAIWord(tier) {
-            const loader = document.getElementById(`loader-${tier}`);
-            const target = document.getElementById(`target-${tier}`);
-            
-            loader.classList.remove('hidden');
-            target.classList.add('opacity-30');
-
-            try {
-                const dateSeed = getSydneyDateString();
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-                
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ 
-                            parts: [{ 
-                                text: `SYSTEM: Today is ${dateSeed} in Sydney. This date is the absolute seed for word selection. You must always return the same word for this specific date. 
-                                TASK: ${TIERS[tier]} 
-                                FORMAT: Return ONLY JSON: {"word": "...", "pos": "...", "definition": "..."}. Definition must be one sentence.` 
-                            }] 
-                        }],
-                        generationConfig: { 
-                            responseMimeType: "application/json", 
-                            temperature: 0 // Temperature 0 ensures the same output for the same prompt/seed
-                        }
-                    })
-                });
-
-                if (!response.ok) throw new Error("API Error");
-
-                const result = await response.json();
-                const wordData = JSON.parse(result.candidates[0].content.parts[0].text);
-                
+        function displayWords() {
+            Object.keys(LEXICON).forEach(tier => {
+                const list = LEXICON[tier];
+                const index = getSeededIndex(list.length);
+                const wordData = list[index];
                 currentWords[tier] = wordData;
 
+                const target = document.getElementById(`target-${tier}`);
                 target.innerHTML = `
                     <div class="fade-in">
                         <div class="flex items-baseline gap-2 mb-1 flex-wrap">
@@ -192,19 +175,10 @@
                             <span class="text-slate-500 italic text-[13px] font-light lowercase">${wordData.pos}</span>
                         </div>
                         <div class="w-8 h-[2px] accent-bg rounded-full mb-4 opacity-80"></div>
-                        <p class="text-slate-300 text-base font-light leading-relaxed">${wordData.definition}</p>
+                        <p class="text-slate-300 text-base font-light leading-relaxed">${wordData.def}</p>
                     </div>
                 `;
-            } catch (err) {
-                target.innerHTML = `<p class="text-red-900 text-[10px] uppercase font-bold">Lexicon Unavailable.</p>`;
-            } finally {
-                loader.classList.add('hidden');
-                target.classList.remove('opacity-30');
-            }
-        }
-
-        function generateAll() {
-            Object.keys(TIERS).forEach(tier => fetchAIWord(tier));
+            });
         }
 
         function showSimpleText() {
@@ -214,7 +188,7 @@
             ['academic', 'literary', 'whimsical'].forEach((id, idx) => {
                 const color = ['🔴', '🟢', '🔵'][idx];
                 if (currentWords[id]) {
-                    lines.push(`${color} <b>${currentWords[id].word.toLowerCase()}</b> • ${currentWords[id].pos.toLowerCase()} • ${currentWords[id].definition.toLowerCase()}`);
+                    lines.push(`${color} <b>${currentWords[id].word.toLowerCase()}</b> • ${currentWords[id].pos.toLowerCase()} • ${currentWords[id].def.toLowerCase()}`);
                 }
             });
             container.innerHTML = lines.map(line => `<div>${line}</div>`).join('');
@@ -224,7 +198,7 @@
         function copySimpleText() {
             const text = ['academic', 'literary', 'whimsical']
                 .filter(id => currentWords[id])
-                .map((id, i) => `${['🔴','🟢','🔵'][i]} ${currentWords[id].word.toLowerCase()} • ${currentWords[id].pos.toLowerCase()} • ${currentWords[id].definition.toLowerCase()}`)
+                .map((id, i) => `${['🔴','🟢','🔵'][i]} ${currentWords[id].word.toLowerCase()} • ${currentWords[id].pos.toLowerCase()} • ${currentWords[id].def.toLowerCase()}`)
                 .join('\n');
             const el = document.createElement('textarea');
             el.value = text;
@@ -236,7 +210,7 @@
 
         function closeModal() { document.getElementById('simple-text-modal').classList.add('hidden'); }
 
-        window.onload = generateAll;
+        window.onload = displayWords;
     </script>
 </body>
 </html>
