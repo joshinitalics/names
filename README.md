@@ -12,7 +12,12 @@ it connects to a firestore database, so a user can enter a unique name to load a
 
 ### version two 
 
-working. looks at a hosted lexicon which has words intrinsically tied to the date which it will pull each day. 
+working now. looks at a hosted lexicon which has words intrinsically tied to the date which it will pull each day. 
+the words and definitions were all selected by Gemini, so there may be inaccuracies. 
+use the Copy Text button to copy a simple-text version of all three words to the clipboard for easy sharing. 
+if you don't like a word, you can shuffle it to pull a new one. 
+if you don't like all three words, you can shuffle them all. this can just be used as a random word generator at this point. 
+to see the original words of the day, press "today's words" to revert. 
 
 ### verson one 
 
