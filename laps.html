@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laps Timer</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React and ReactDOM -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX transformation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body class="bg-[#0f172a] text-slate-100 font-sans">
+    <div id="root"></div>
+
+    <!-- Firebase Compat Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        /**
+         * AUTO-CONFIG LOADER
+         * This script will attempt to load credentials from a local file named 'firebase-config.json'
+         * so you don't have to hardcode them every time you update this file.
+         */
+        const App = () => {
+            const [config, setConfig] = useState({
+                apiKey: "",
+                authDomain: "",
+                projectId: "",
+                storageBucket: "",
+                messagingSenderId: "",
+                appId: ""
+            });
+            const [isFirebaseConfigured, setIsFirebaseConfigured] = useState(false);
+            const [isCheckingConfig, setIsCheckingConfig] = useState(true);
+
+            const [user, setUser] = useState(null);
+            const [userKey, setUserKey] = useState(localStorage.getItem('stopwatch_user_key') || '');
+            const [isKeySaved, setIsKeySaved] = useState(!!localStorage.getItem('stopwatch_user_key'));
+            const [shuffledLaps, setShuffledLaps] = useState([]);
+            const [currentIndex, setCurrentIndex] = useState(-1);
+            const [totalTime, setTotalTime] = useState(0);
+            const [lapTime, setLapTime] = useState(0);
+            const [completedLaps, setCompletedLaps] = useState([]);
+            const [history, setHistory] = useState(() => {
+                const localData = localStorage.getItem('stopwatch_history_offline');
+                return localData ? JSON.parse(localData) : [];
+            });
+            const [isRunning, setIsRunning] = useState(false);
+            const [isSyncing, setIsSyncing] = useState(false);
+
+            const timerRef = useRef(null);
+            const startTimeRef = useRef(0);
+            const lapStartTimeRef = useRef(0);
+            const dbRef = useRef(null);
+            const authRef = useRef(null);
+
+            // 1. Load Config & Initialize Firebase
+            useEffect(() => {
+                const init = async () => {
+                    let finalConfig = config;
+
+                    try {
+                        // Attempt to fetch external config file
+                        const response = await fetch('firebase-config.json');
+                        if (response.ok) {
+                            const externalConfig = await response.json();
+                            finalConfig = { ...finalConfig, ...externalConfig };
+                            setConfig(finalConfig);
+                        }
+                    } catch (e) {
+                        console.log("No external firebase-config.json found, using hardcoded config.");
+                    }
+
+                    if (finalConfig.apiKey && finalConfig.apiKey !== "") {
+                        try {
+                            if (!firebase.apps.length) {
+                                firebase.initializeApp(finalConfig);
+                            }
+                            authRef.current = firebase.auth();
+                            dbRef.current = firebase.firestore();
+                            
+                            authRef.current.signInAnonymously().catch(console.error);
+                            const unsubscribe = authRef.current.onAuthStateChanged(setUser);
+                            
+                            setIsFirebaseConfigured(true);
+                            // Cleanup auth listener on unmount
+                            window._fbUnsubscribe = unsubscribe;
+                        } catch (err) {
+                            console.warn("Firebase initialization failed:", err);
+                        }
+                    }
+                    
+                    shuffleLaps();
+                    setIsCheckingConfig(false);
+                };
+
+                init();
+                return () => {
+                    if (window._fbUnsubscribe) window._fbUnsubscribe();
+                };
+            }, []);
+
+            // 2. Sync with Firestore
+            useEffect(() => {
+                if (!isFirebaseConfigured || !dbRef.current || !user || !isKeySaved || !userKey) return;
+                
+                setIsSyncing(true);
+                const cleanKey = userKey.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+                
+                const unsubscribe = dbRef.current.collection('stopwatch_data').doc(cleanKey)
+                    .onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const cloudHistory = doc.data().history || [];
+                            setHistory(cloudHistory);
+                            localStorage.setItem('stopwatch_history_offline', JSON.stringify(cloudHistory));
+                        }
+                        setIsSyncing(false);
+                    }, (err) => {
+                        console.error("Firestore error:", err);
+                        setIsSyncing(false);
+                    });
+                return () => unsubscribe();
+            }, [user, isKeySaved, userKey, isFirebaseConfigured]);
+
+            const shuffleLaps = () => setShuffledLaps([...LAP_NAMES].sort(() => Math.random() - 0.5));
+
+            const formatTime = (ms) => {
+                const min = Math.floor(ms / 60000).toString().padStart(2, '0');
+                const sec = Math.floor((ms % 60000) / 1000).toString().padStart(2, '0');
+                const cs = Math.floor((ms % 1000) / 10).toString().padStart(2, '0');
+                return `${min}:${sec}.${cs}`;
+            };
+
+            const handleSaveKey = () => {
+                if (userKey.trim()) {
+                    localStorage.setItem('stopwatch_user_key', userKey.trim());
+                    setIsKeySaved(true);
+                }
+            };
+
+            const handleClearKey = () => {
+                localStorage.removeItem('stopwatch_user_key');
+                setIsKeySaved(false);
+                setUserKey('');
+                setHistory([]);
+                localStorage.removeItem('stopwatch_history_offline');
+            };
+
+            const startStopwatch = () => {
+                setIsRunning(true);
+                setCurrentIndex(0);
+                const now = Date.now();
+                startTimeRef.current = now;
+                lapStartTimeRef.current = now;
+                timerRef.current = setInterval(() => {
+                    const currentTime = Date.now();
+                    setTotalTime(currentTime - startTimeRef.current);
+                    setLapTime(currentTime - lapStartTimeRef.current);
+                }, 10);
+            };
+
+            const nextLap = () => {
+                if (!isRunning) return;
+                const newLap = { name: shuffledLaps[currentIndex], time: lapTime };
+                const updated = [...completedLaps, newLap];
+                setCompletedLaps(updated);
+                if (currentIndex === shuffledLaps.length - 1) {
+                    finishSession(updated);
+                } else {
+                    setCurrentIndex(prev => prev + 1);
+                    lapStartTimeRef.current = Date.now();
+                    setLapTime(0);
+                }
+            };
+
+            const finishSession = async (finalLaps) => {
+                clearInterval(timerRef.current);
+                setIsRunning(false);
+                const session = { id: Date.now(), date: new Date().toLocaleString(), total: totalTime, laps: finalLaps };
+                const newHistory = [session, ...history];
+                
+                setHistory(newHistory);
+                localStorage.setItem('stopwatch_history_offline', JSON.stringify(newHistory));
+
+                if (isFirebaseConfigured && dbRef.current && isKeySaved && userKey) {
+                    setIsSyncing(true);
+                    const cleanKey = userKey.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+                    try {
+                        await dbRef.current.collection('stopwatch_data').doc(cleanKey).set({ history: newHistory });
+                    } catch (e) {
+                        console.error("Cloud save failed", e);
+                    }
+                    setIsSyncing(false);
+                }
+                setCurrentIndex(-2);
+            };
+
+            const resetAll = () => {
+                clearInterval(timerRef.current);
+                setIsRunning(false);
+                setTotalTime(0);
+                setLapTime(0);
+                setCompletedLaps([]);
+                setCurrentIndex(-1);
+                shuffleLaps();
+            };
+
+            useEffect(() => {
+                const handleKey = (e) => {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        if (!isRunning && currentIndex === -1) startStopwatch();
+                        else if (isRunning) nextLap();
+                    }
+                };
+                window.addEventListener('keydown', handleKey);
+                return () => window.removeEventListener('keydown', handleKey);
+            }, [isRunning, currentIndex, shuffledLaps, lapTime]);
+
+            if (isCheckingConfig) {
+                return <div className="min-h-screen flex items-center justify-center text-slate-500 font-mono text-xs uppercase tracking-widest">Initializing...</div>;
+            }
+
+            const LAP_NAMES = ["gufnork", "bilby", "gwilem", "reeve", "andre", "jazz", "sadie", "echo", "skewb", "mirror"];
+
+            return (
+                <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
+                    <div className="w-full max-w-3xl space-y-6">
+                        
+                        {!isFirebaseConfigured && (
+                            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-center">
+                                <p className="text-amber-400 text-xs font-bold uppercase tracking-widest">
+                                    Offline Preview Mode (firebase-config.json not found)
+                                </p>
+                            </div>
+                        )}
+
+                        {/* User Identity Bar */}
+                        <div className="bg-[#1e293b] rounded-2xl p-4 border border-slate-800 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                {!isKeySaved ? (
+                                    <div className="flex gap-2">
+                                        <input 
+                                            value={userKey} 
+                                            onChange={e => setUserKey(e.target.value)}
+                                            placeholder="Enter Key (e.g. jam)"
+                                            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1 text-sm focus:outline-none"
+                                        />
+                                        <button onClick={handleSaveKey} className="bg-blue-600 px-4 py-1 rounded-lg text-xs font-bold">SAVE</button>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-bold">User: <span className="text-blue-400">{userKey}</span></span>
+                                        <button onClick={handleClearKey} className="text-[10px] text-slate-500 uppercase">Change</button>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="text-[10px] font-bold uppercase tracking-tighter">
+                                {isSyncing ? <span className="text-blue-400">Syncing...</span> : 
+                                 (isKeySaved && isFirebaseConfigured) ? <span className="text-emerald-400">Cloud Active</span> : 
+                                 <span className="text-slate-500">Local Only</span>}
+                            </div>
+                        </div>
+
+                        {/* Stopwatch */}
+                        <div className="bg-[#1e293b] rounded-[3rem] p-12 text-center border border-slate-800 shadow-2xl relative overflow-hidden">
+                             <div className="relative z-10">
+                                <h2 className="text-7xl md:text-9xl font-black uppercase mb-8 text-white">
+                                    {currentIndex >= 0 && currentIndex < shuffledLaps.length ? shuffledLaps[currentIndex] : currentIndex === -2 ? "Done" : "Ready"}
+                                </h2>
+                                <div className="text-6xl md:text-8xl font-mono font-bold text-blue-400 mb-2">{formatTime(lapTime)}</div>
+                                <div className="text-slate-500 font-mono mb-10">Total: {formatTime(totalTime)}</div>
+                                
+                                <div className="flex justify-center gap-4">
+                                    {currentIndex === -1 && <button onClick={startStopwatch} className="bg-blue-600 px-12 py-4 rounded-2xl font-black text-xl">START</button>}
+                                    {isRunning && <button onClick={nextLap} className="bg-emerald-600 px-12 py-4 rounded-2xl font-black text-xl">NEXT LAP</button>}
+                                    {currentIndex === -2 && <button onClick={resetAll} className="bg-slate-700 px-12 py-4 rounded-2xl font-black text-xl">RESET</button>}
+                                </div>
+                             </div>
+                        </div>
+
+                        {/* History */}
+                        <div className="bg-[#1e293b] rounded-3xl border border-slate-800 overflow-hidden">
+                            <div className="p-6 border-b border-slate-800 font-bold uppercase text-xs tracking-widest text-slate-400 flex justify-between items-center">
+                                <span>History</span>
+                                {!isFirebaseConfigured && <span className="text-[10px] text-amber-500/50">Saving to Browser Memory</span>}
+                            </div>
+                            <div className="divide-y divide-slate-800">
+                                {history.length === 0 ? (
+                                    <div className="p-10 text-center text-slate-600 italic text-sm">No history yet.</div>
+                                ) : (
+                                    history.map(session => (
+                                        <div key={session.id} className="p-6 bg-slate-900/20">
+                                            <div className="flex justify-between items-end mb-4">
+                                                <div>
+                                                    <div className="text-[10px] text-slate-500 font-bold mb-1">{session.date}</div>
+                                                    <div className="text-2xl font-black font-mono">{formatTime(session.total)}</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {session.laps.map((l, i) => (
+                                                    <div key={i} className="bg-slate-800/50 p-2 rounded-lg border border-slate-700/50">
+                                                        <div className="text-[8px] uppercase text-slate-500 font-black">{l.name}</div>
+                                                        <div className="text-xs font-mono font-bold">{formatTime(l.time)}</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
