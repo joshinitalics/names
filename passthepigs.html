@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pass the Pigs — Score Tracker</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐷</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -532,7 +533,7 @@
     </button>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal('setupModal')">Cancel</button>
-      <button class="btn primary" onclick="applyPlayers()">Apply</button>
+      <button class="btn primary" onclick="applyPlayersOrReset()">Apply</button>
     </div>
   </div>
 </div>
@@ -606,7 +607,7 @@
       input.placeholder = '—';
       input.dataset.round = r;
       input.dataset.player = p;
-      input.addEventListener('input', onScoreInput);
+      input.addEventListener('change', onScoreInput);
       td.appendChild(input);
       tr.appendChild(td);
     });
@@ -736,33 +737,43 @@
   }
 
   function applyPlayers() {
+    applyPlayersOrReset();
+  }
+
+  /* ── Reset ── */
+  let pendingReset = false;
+
+  function confirmReset() {
+    // Mark that when players are applied next, scores should be wiped
+    pendingReset = true;
+    openSetupModal();
+  }
+
+  function applyPlayersOrReset() {
     const inputs = document.querySelectorAll('#playerList .player-entry input');
     const names = Array.from(inputs).map(i => i.value.trim()).filter(Boolean);
     if (names.length < 1) return;
 
-    const oldCount = players.length;
     players = names;
-
-    // Expand or trim rounds to new player count
-    rounds = rounds.map(round => {
-      const newRound = Array(players.length).fill(null);
-      for (let p = 0; p < Math.min(oldCount, players.length); p++) newRound[p] = round[p];
-      return newRound;
-    });
-
     winnerShown = false;
+    clearWinners();
+
+    if (pendingReset) {
+      // Full reset: one blank round
+      rounds = [Array(players.length).fill(null)];
+      pendingReset = false;
+    } else {
+      // Just updating players mid-game: preserve scores
+      const oldCount = players.length;
+      rounds = rounds.map(round => {
+        const newRound = Array(players.length).fill(null);
+        for (let p = 0; p < Math.min(oldCount, players.length); p++) newRound[p] = round[p];
+        return newRound;
+      });
+    }
+
     closeModal('setupModal');
     rebuildTable();
-    checkWinners();
-  }
-
-  /* ── Reset ── */
-  function confirmReset() {
-    if (confirm('Start a new game? All scores will be cleared.')) {
-      winnerShown = false;
-      rounds = [Array(players.length).fill(null)];
-      rebuildTable();
-    }
   }
 
   /* ── Modal utils ── */
