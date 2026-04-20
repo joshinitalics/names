@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pass the Pigs — Score Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1a1c;
+    --surface: #242428;
+    --surface-2: #2e2e33;
+    --border: #3a3a40;
+    --pink: #f06292;
+    --pink-dim: #c2185b;
+    --pink-glow: rgba(240, 98, 146, 0.15);
+    --pink-glow-soft: rgba(240, 98, 146, 0.07);
+    --text: #f0eef4;
+    --text-dim: #8f8d97;
+    --text-muted: #5a5860;
+    --gold: #f5c842;
+    --win: #66bb6a;
+    --win-glow: rgba(102, 187, 106, 0.15);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 32px 20px 80px;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(240,98,146,0.06) 0%, transparent 70%);
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    letter-spacing: -0.02em;
+    color: var(--text);
+    line-height: 1.05;
+  }
+
+  header h1 span {
+    color: var(--pink);
+  }
+
+  header p {
+    margin-top: 6px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── Controls bar ── */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+  }
+
+  .btn:hover {
+    border-color: var(--pink);
+    background: var(--surface-2);
+    box-shadow: 0 0 0 3px var(--pink-glow);
+  }
+
+  .btn.primary {
+    background: var(--pink);
+    border-color: var(--pink);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .btn.primary:hover {
+    background: #e91e8c;
+    border-color: #e91e8c;
+    box-shadow: 0 0 12px rgba(240,98,146,0.4);
+  }
+
+  .btn.danger {
+    border-color: #5a2020;
+    color: #e57373;
+  }
+
+  .btn.danger:hover {
+    border-color: #e57373;
+    box-shadow: 0 0 0 3px rgba(229,115,115,0.12);
+  }
+
+  .btn svg { flex-shrink: 0; }
+
+  /* ── Target score bar ── */
+  .target-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 28px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .target-bar label {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .target-bar input[type="number"] {
+    width: 90px;
+    padding: 6px 10px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--pink);
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    transition: border-color 0.18s;
+  }
+
+  .target-bar input:focus {
+    outline: none;
+    border-color: var(--pink);
+    box-shadow: 0 0 0 3px var(--pink-glow);
+  }
+
+  /* ── Table wrapper ── */
+  .table-scroll {
+    overflow-x: auto;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    box-shadow: 0 4px 40px rgba(0,0,0,0.4);
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 420px;
+  }
+
+  /* ── Table header ── */
+  thead tr {
+    background: var(--surface);
+  }
+
+  th {
+    padding: 14px 16px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    border-bottom: 2px solid var(--pink-dim);
+  }
+
+  th.round-col {
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    width: 90px;
+  }
+
+  th.player-col {
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    min-width: 120px;
+    position: relative;
+  }
+
+  th.player-col .player-name-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  th.player-col .winner-badge {
+    display: none;
+    font-size: 0.7rem;
+    background: var(--win);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    animation: badgePop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  th.player-col.is-winner .winner-badge {
+    display: inline-block;
+  }
+
+  th.player-col.is-winner {
+    color: var(--win);
+    background: var(--win-glow);
+  }
+
+  @keyframes badgePop {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  /* ── Table body ── */
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody tr:hover { background: var(--pink-glow-soft); }
+
+  td {
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  td.round-label {
+    padding: 10px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    text-align: left;
+  }
+
+  td.score-cell {
+    position: relative;
+  }
+
+  /* Score input inside cell */
+  td.score-cell input[type="number"] {
+    width: 100%;
+    height: 100%;
+    min-height: 46px;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  td.score-cell input[type="number"]:focus {
+    outline: none;
+    background: var(--pink-glow);
+    color: var(--pink);
+  }
+
+  td.score-cell input[type="number"]::-webkit-inner-spin-button,
+  td.score-cell input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  /* ── Totals row ── */
+  tfoot tr {
+    background: var(--surface);
+    border-top: 2px solid var(--pink-dim);
+  }
+
+  tfoot td {
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 1rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--pink);
+    text-align: center;
+  }
+
+  tfoot td.total-label {
+    text-align: left;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+  }
+
+  tfoot td.is-winner-total {
+    color: var(--win);
+    font-size: 1.15rem;
+  }
+
+  /* ── Round actions ── */
+  .row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 10px;
+  }
+
+  /* ── Add round row ── */
+  .add-round-row td {
+    padding: 10px;
+    text-align: center;
+  }
+
+  /* ── Modal ── */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+    width: min(480px, 90vw);
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    animation: slideUp 0.22s cubic-bezier(0.34,1.4,0.64,1);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(24px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  .modal h2 span { color: var(--pink); }
+
+  .player-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+  .player-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .player-entry input[type="text"] {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.18s;
+  }
+
+  .player-entry input[type="text"]:focus {
+    outline: none;
+    border-color: var(--pink);
+    box-shadow: 0 0 0 3px var(--pink-glow);
+  }
+
+  .modal .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* ── Winner overlay ── */
+  .winner-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+  }
+  .winner-overlay.open { display: flex; }
+
+  .winner-card {
+    background: var(--surface);
+    border: 2px solid var(--win);
+    border-radius: 20px;
+    padding: 48px 56px;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(102,187,106,0.2), 0 24px 80px rgba(0,0,0,0.6);
+    animation: slideUp 0.3s cubic-bezier(0.34,1.4,0.64,1);
+  }
+
+  .winner-card .pig-emoji { font-size: 4rem; margin-bottom: 12px; }
+
+  .winner-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--win);
+    margin-bottom: 6px;
+  }
+
+  .winner-card p {
+    color: var(--text-dim);
+    font-size: 1rem;
+    margin-bottom: 28px;
+  }
+
+  .winner-card .winner-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    color: var(--text);
+    font-weight: 900;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .winner-card .winner-score {
+    font-family: 'DM Mono', monospace;
+    color: var(--pink);
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 28px;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--pink-dim); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Pass the <span>Pigs</span></h1>
+  <p>Score Tracker</p>
+</header>
+
+<!-- Controls -->
+<div class="controls">
+  <button class="btn primary" onclick="openSetupModal()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Players
+  </button>
+  <button class="btn" onclick="addRound()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add Round
+  </button>
+  <button class="btn danger" onclick="confirmReset()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+    New Game
+  </button>
+</div>
+
+<!-- Target score -->
+<div class="target-bar">
+  <label>Target Score</label>
+  <input type="number" id="targetScore" value="100" min="1" oninput="checkWinners()">
+  <label>points</label>
+</div>
+
+<!-- Main table -->
+<div class="table-scroll">
+  <table id="scoreTable">
+    <thead>
+      <tr id="headerRow">
+        <th class="round-col">Round</th>
+        <!-- player columns injected here -->
+      </tr>
+    </thead>
+    <tbody id="scoreBody">
+      <!-- rounds injected here -->
+    </tbody>
+    <tfoot>
+      <tr id="totalsRow">
+        <td class="total-label">Total</td>
+        <!-- totals injected here -->
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<!-- Setup Modal -->
+<div class="modal-backdrop" id="setupModal">
+  <div class="modal">
+    <h2>Set up <span>Players</span></h2>
+    <div class="player-list" id="playerList"></div>
+    <button class="btn" onclick="addPlayerField()" style="margin-bottom:20px;">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Player
+    </button>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('setupModal')">Cancel</button>
+      <button class="btn primary" onclick="applyPlayers()">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Winner overlay -->
+<div class="winner-overlay" id="winnerOverlay">
+  <div class="winner-card">
+    <div class="pig-emoji">🐷</div>
+    <h2>Winner!</h2>
+    <span class="winner-name" id="winnerName"></span>
+    <span class="winner-score" id="winnerScore"></span>
+    <p>Reached the target score!</p>
+    <button class="btn primary" onclick="closeModal('winnerOverlay')">Continue Game</button>
+  </div>
+</div>
+
+<script>
+  /* ── State ── */
+  let players = ['Alice', 'Bob'];
+  let rounds = []; // rounds[r][p] = score (number or null)
+  let winnerShown = false;
+
+  /* ── Init ── */
+  function init() {
+    rounds = [Array(players.length).fill(null)];
+    rebuildTable();
+  }
+
+  /* ── Table building ── */
+  function rebuildTable() {
+    buildHeader();
+    buildBody();
+    buildTotals();
+  }
+
+  function buildHeader() {
+    const row = document.getElementById('headerRow');
+    // Keep first th (Round)
+    while (row.children.length > 1) row.removeChild(row.lastChild);
+    players.forEach((name, i) => {
+      const th = document.createElement('th');
+      th.className = 'player-col';
+      th.id = `ph-${i}`;
+      th.innerHTML = `<div class="player-name-wrap">${escHtml(name)}<span class="winner-badge">🏆 Winner</span></div>`;
+      row.appendChild(th);
+    });
+  }
+
+  function buildBody() {
+    const tbody = document.getElementById('scoreBody');
+    tbody.innerHTML = '';
+    rounds.forEach((round, r) => buildRoundRow(tbody, round, r));
+  }
+
+  function buildRoundRow(tbody, round, r) {
+    const tr = document.createElement('tr');
+
+    // Round label
+    const labelTd = document.createElement('td');
+    labelTd.className = 'round-label';
+    labelTd.innerHTML = `<span>Round ${r + 1}</span>`;
+    tr.appendChild(labelTd);
+
+    // Score cells
+    players.forEach((_, p) => {
+      const td = document.createElement('td');
+      td.className = 'score-cell';
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.value = round[p] !== null ? round[p] : '';
+      input.placeholder = '—';
+      input.dataset.round = r;
+      input.dataset.player = p;
+      input.addEventListener('input', onScoreInput);
+      td.appendChild(input);
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  }
+
+  function buildTotals() {
+    const row = document.getElementById('totalsRow');
+    while (row.children.length > 1) row.removeChild(row.lastChild);
+    const totals = getTotals();
+    players.forEach((_, i) => {
+      const td = document.createElement('td');
+      td.id = `total-${i}`;
+      td.textContent = totals[i];
+      row.appendChild(td);
+    });
+  }
+
+  /* ── Score handling ── */
+  function onScoreInput(e) {
+    const r = parseInt(e.target.dataset.round);
+    const p = parseInt(e.target.dataset.player);
+    const val = e.target.value.trim();
+    rounds[r][p] = val === '' ? null : Number(val);
+    updateTotals();
+
+    const thisRoundComplete = rounds[r].every(s => s !== null);
+
+    // Only check for winners once every player has a score in THIS round
+    if (thisRoundComplete) {
+      checkWinners();
+    } else {
+      // A score was cleared mid-round — roll back any winner state
+      clearWinners();
+    }
+
+    // Auto-add a new round when the last round is fully filled
+    const isLastRound = r === rounds.length - 1;
+    if (isLastRound && thisRoundComplete) {
+      setTimeout(() => {
+        if (rounds[r].every(s => s !== null) && r === rounds.length - 1) {
+          addRound();
+        }
+      }, 200);
+    }
+  }
+
+  function getTotals() {
+    return players.map((_, p) =>
+      rounds.reduce((sum, round) => sum + (round[p] !== null ? round[p] : 0), 0)
+    );
+  }
+
+  function updateTotals() {
+    const totals = getTotals();
+    players.forEach((_, i) => {
+      const el = document.getElementById(`total-${i}`);
+      if (el) el.textContent = totals[i];
+    });
+  }
+
+  /* ── Winner check — only called when the edited round is fully complete ── */
+  function checkWinners() {
+    const target = parseInt(document.getElementById('targetScore').value) || 100;
+    const totals = getTotals();
+    let hasWinner = false;
+
+    players.forEach((name, i) => {
+      const th = document.getElementById(`ph-${i}`);
+      const totalEl = document.getElementById(`total-${i}`);
+      if (totals[i] >= target) {
+        th?.classList.add('is-winner');
+        totalEl?.classList.add('is-winner-total');
+        hasWinner = true;
+        if (!winnerShown) {
+          winnerShown = true;
+          document.getElementById('winnerName').textContent = name;
+          document.getElementById('winnerScore').textContent = `${totals[i]} points`;
+          document.getElementById('winnerOverlay').classList.add('open');
+        }
+      } else {
+        th?.classList.remove('is-winner');
+        totalEl?.classList.remove('is-winner-total');
+      }
+    });
+
+    if (!hasWinner) winnerShown = false;
+  }
+
+  /* ── Clear winner state when a round becomes incomplete again ── */
+  function clearWinners() {
+    winnerShown = false;
+    players.forEach((_, i) => {
+      document.getElementById(`ph-${i}`)?.classList.remove('is-winner');
+      document.getElementById(`total-${i}`)?.classList.remove('is-winner-total');
+    });
+  }
+
+  /* ── Add round ── */
+  function addRound() {
+    rounds.push(Array(players.length).fill(null));
+    const tbody = document.getElementById('scoreBody');
+    buildRoundRow(tbody, rounds[rounds.length - 1], rounds.length - 1);
+  }
+
+  /* ── Player setup ── */
+  function openSetupModal() {
+    const list = document.getElementById('playerList');
+    list.innerHTML = '';
+    players.forEach(name => addPlayerField(name));
+    if (players.length === 0) addPlayerField('');
+    document.getElementById('setupModal').classList.add('open');
+  }
+
+  function addPlayerField(name = '') {
+    const list = document.getElementById('playerList');
+    const div = document.createElement('div');
+    div.className = 'player-entry';
+    div.innerHTML = `
+      <input type="text" placeholder="Player name" value="${escHtml(name)}">
+      <button class="btn danger" onclick="this.parentElement.remove()" title="Remove">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>`;
+    list.appendChild(div);
+    div.querySelector('input').focus();
+  }
+
+  function applyPlayers() {
+    const inputs = document.querySelectorAll('#playerList .player-entry input');
+    const names = Array.from(inputs).map(i => i.value.trim()).filter(Boolean);
+    if (names.length < 1) return;
+
+    const oldCount = players.length;
+    players = names;
+
+    // Expand or trim rounds to new player count
+    rounds = rounds.map(round => {
+      const newRound = Array(players.length).fill(null);
+      for (let p = 0; p < Math.min(oldCount, players.length); p++) newRound[p] = round[p];
+      return newRound;
+    });
+
+    winnerShown = false;
+    closeModal('setupModal');
+    rebuildTable();
+    checkWinners();
+  }
+
+  /* ── Reset ── */
+  function confirmReset() {
+    if (confirm('Start a new game? All scores will be cleared.')) {
+      winnerShown = false;
+      rounds = [Array(players.length).fill(null)];
+      rebuildTable();
+    }
+  }
+
+  /* ── Modal utils ── */
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  // Click outside modal to close
+  document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+    backdrop.addEventListener('click', e => {
+      if (e.target === backdrop) backdrop.classList.remove('open');
+    });
+  });
+
+  document.getElementById('winnerOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('winnerOverlay'))
+      document.getElementById('winnerOverlay').classList.remove('open');
+  });
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Start ── */
+  init();
+</script>
+</body>
+</html>
