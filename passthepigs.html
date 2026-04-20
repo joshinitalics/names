@@ -171,12 +171,20 @@
     border-radius: var(--radius);
     border: 1.5px solid var(--border);
     box-shadow: 0 4px 40px rgba(0,0,0,0.4);
+    /* size to content, but never exceed the viewport */
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: top;
+  }
+
+  .table-scroll-outer {
+    text-align: center;
   }
 
   table {
     border-collapse: collapse;
-    width: 100%;
-    min-width: 420px;
+    /* don't stretch; let columns dictate width */
+    width: auto;
   }
 
   /* ── Table header ── */
@@ -207,7 +215,8 @@
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
     font-size: 0.95rem;
-    min-width: 120px;
+    width: 300px;
+    min-width: 150px;
     position: relative;
   }
 
@@ -502,6 +511,7 @@
 </div>
 
 <!-- Main table -->
+<div class="table-scroll-outer">
 <div class="table-scroll">
   <table id="scoreTable">
     <thead>
@@ -520,6 +530,7 @@
       </tr>
     </tfoot>
   </table>
+</div>
 </div>
 
 <!-- Setup Modal -->
