@@ -487,7 +487,6 @@
   <p>Score Tracker</p>
 </header>
 
-<!-- Controls -->
 <div class="controls">
   <button class="btn primary" onclick="openSetupModal()">
     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -503,37 +502,31 @@
   </button>
 </div>
 
-<!-- Target score -->
 <div class="target-bar">
   <label>Target Score</label>
-  <input type="number" id="targetScore" value="100" min="1" oninput="checkWinners()">
+  <input type="number" id="targetScore" value="100" min="1" oninput="checkWinners(); saveState()">
   <label>points</label>
 </div>
 
-<!-- Main table -->
 <div class="table-scroll-outer">
 <div class="table-scroll">
   <table id="scoreTable">
     <thead>
       <tr id="headerRow">
         <th class="round-col">Round</th>
-        <!-- player columns injected here -->
-      </tr>
+        </tr>
     </thead>
     <tbody id="scoreBody">
-      <!-- rounds injected here -->
-    </tbody>
+      </tbody>
     <tfoot>
       <tr id="totalsRow">
         <td class="total-label">Total</td>
-        <!-- totals injected here -->
-      </tr>
+        </tr>
     </tfoot>
   </table>
 </div>
 </div>
 
-<!-- Setup Modal -->
 <div class="modal-backdrop" id="setupModal">
   <div class="modal">
     <h2>Set up <span>Players</span></h2>
@@ -549,7 +542,6 @@
   </div>
 </div>
 
-<!-- Winner overlay -->
 <div class="winner-overlay" id="winnerOverlay">
   <div class="winner-card">
     <div class="pig-emoji">🐷</div>
@@ -567,10 +559,44 @@
   let rounds = []; // rounds[r][p] = score (number or null)
   let winnerShown = false;
 
+  /* ── Local Storage (Saving/Loading) ── */
+  function saveState() {
+    const state = {
+      players: players,
+      rounds: rounds,
+      winnerShown: winnerShown,
+      targetScore: document.getElementById('targetScore').value
+    };
+    localStorage.setItem('pigsState', JSON.stringify(state));
+  }
+
+  function loadState() {
+    const saved = localStorage.getItem('pigsState');
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        players = state.players || ['Alice', 'Bob'];
+        rounds = state.rounds || [Array(players.length).fill(null)];
+        winnerShown = state.winnerShown || false;
+        if (state.targetScore) {
+          document.getElementById('targetScore').value = state.targetScore;
+        }
+        return true;
+      } catch (e) {
+        console.error("Could not load saved game state", e);
+      }
+    }
+    return false;
+  }
+
   /* ── Init ── */
   function init() {
-    rounds = [Array(players.length).fill(null)];
+    // Try to load state; if none exists, set up default rounds array
+    if (!loadState()) {
+      rounds = [Array(players.length).fill(null)];
+    }
     rebuildTable();
+    checkWinners(); // Ensures winners are highlighted properly on reload
   }
 
   /* ── Table building ── */
@@ -665,6 +691,9 @@
         }
       }, 200);
     }
+    
+    // Save state after any score input
+    saveState();
   }
 
   function getTotals() {
@@ -707,6 +736,7 @@
     });
 
     if (!hasWinner) winnerShown = false;
+    saveState();
   }
 
   /* ── Clear winner state when a round becomes incomplete again ── */
@@ -716,6 +746,7 @@
       document.getElementById(`ph-${i}`)?.classList.remove('is-winner');
       document.getElementById(`total-${i}`)?.classList.remove('is-winner-total');
     });
+    saveState();
   }
 
   /* ── Add round ── */
@@ -723,6 +754,7 @@
     rounds.push(Array(players.length).fill(null));
     const tbody = document.getElementById('scoreBody');
     buildRoundRow(tbody, rounds[rounds.length - 1], rounds.length - 1);
+    saveState();
   }
 
   /* ── Player setup ── */
@@ -785,6 +817,7 @@
 
     closeModal('setupModal');
     rebuildTable();
+    saveState();
   }
 
   /* ── Modal utils ── */
